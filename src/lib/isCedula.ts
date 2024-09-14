@@ -59,9 +59,6 @@ export default function isCedula(cedula: string): boolean {
     return false;
   }
 
-  if (validatorDigit == lastDigit) {
-    return true;
-  }
-
-  return false;
+  // Si el dígito verificador es igual al último dígito de la cédula, la cédula es válida
+  return validatorDigit === lastDigit;
 }
