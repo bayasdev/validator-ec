@@ -42,7 +42,8 @@
   "scripts": {
     "build": "tsup",
     "test": "vitest",
-    "prepublish": "bun run build"
+    "prepublish": "bun run build",
+    "publish": "npm publish"
   },
   "devDependencies": {
     "@types/bun": "latest",
