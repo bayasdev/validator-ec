@@ -107,4 +107,4 @@ bun run build
 
 ## Licencia
 
-Este proyecto está liberado bajo la licencia Apache 2.0. Para más información, revisa el archivo [LICENSE](LICENSE.md).
+Este proyecto está liberado bajo la licencia Apache 2.0. Para más información, revisa el archivo [LICENSE](LICENSE).
