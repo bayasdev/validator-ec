@@ -1,6 +1,12 @@
 import isDigits from "../helpers/isDigits";
 import isCedula from "./isCedula";
 
+/**
+ * Valida un RUC ecuatoriano.
+ *
+ * @param {string} ruc El RUC a validar.
+ * @returns {boolean} Devuelve `true` si el RUC es válido, de lo contrario devuelve `false`.
+ */
 export default function isRUC(ruc: string): boolean {
   // Verificamos que el RUC tenga 13 dígitos
   if (ruc.length !== 13) {

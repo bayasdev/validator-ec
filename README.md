@@ -1,6 +1,8 @@
 # validator-ec
 
-**validator-ec** es una colección de validadores de datos para Ecuador desarrollada en TypeScript. Actualmente, cuenta con validadores para cédulas de identidad ecuatorianas y números de RUC (Registro Único de Contribuyentes).
+Colección de validadores de datos comunes en Ecuador desarrollada en TypeScript.
+
+Actualmente, cuenta con validadores para cédulas de identidad ecuatorianas, números de RUC (Registro Único de Contribuyentes) y códigos postales.
 
 ## Características
 
@@ -32,10 +34,11 @@ npm install validator-ec
 
 ## Validadores
 
-| Validador                           | Descripción                                                                                                               | Ejemplo                  |
-| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | ------------------------ |
-| `isCedula(cedula: string): boolean` | Valida una cédula de identidad ecuatoriana. Devuelve `true` si la cédula es válida, de lo contrario `false`.              | `isCedula('1710034065')` |
-| `isRUC(ruc: string): boolean`       | Valida un número de RUC (Registro Único de Contribuyentes). Devuelve `true` si el RUC es válido, de lo contrario `false`. | `isRUC('1790016919001')` |
+| Validador                             | Descripción                                                                                                               | Ejemplo                  |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | ------------------------ |
+| `isCedula(cedula: string): boolean`   | Valida una cédula de identidad ecuatoriana. Devuelve `true` si la cédula es válida, de lo contrario `false`.              | `isCedula('1710034065')` |
+| `isRUC(ruc: string): boolean`         | Valida un número de RUC (Registro Único de Contribuyentes). Devuelve `true` si el RUC es válido, de lo contrario `false`. | `isRUC('1790016919001')` |
+| `isZipCode(zipCode: string): boolean` | Valida un código postal ecuatoriano. Devuelve `true` si el código postal es válido, de lo contrario `false`.              | `isZipCode('131401')`    |
 
 ## Uso
 

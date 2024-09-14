@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { isCedula, isRUC } from "../src";
+import { isCedula, isRUC, isZipCode } from "../src";
 
 describe("Validador isCedula", () => {
   it("debería retornar true para una cédula válida", () => {
@@ -97,5 +97,39 @@ describe("Validador isRUC", () => {
 
   it("debería retornar false si el código de establecimiento no es 001", () => {
     expect(isRUC("1710034065000")).toBe(false);
+  });
+});
+
+describe("Función isZipCode", () => {
+  it("debería retornar true para un código postal válido", () => {
+    expect(isZipCode("170150")).toBe(true); // Código postal válido de Pichincha
+    expect(isZipCode("090112")).toBe(true); // Código postal válido de Guayas
+    expect(isZipCode("010203")).toBe(true); // Código postal válido de Azuay
+    expect(isZipCode("240205")).toBe(true); // Código postal válido de Santa Elena
+    expect(isZipCode("220202")).toBe(true); // Código postal válido de Orellana
+  });
+
+  it("debería retornar false si el código postal no tiene 6 dígitos", () => {
+    expect(isZipCode("17015")).toBe(false);
+    expect(isZipCode("1701500")).toBe(false);
+    expect(isZipCode("1701")).toBe(false);
+  });
+
+  it("debería retornar false si el código postal contiene caracteres no numéricos", () => {
+    expect(isZipCode("17A150")).toBe(false);
+    expect(isZipCode("17015X")).toBe(false);
+    expect(isZipCode("170-50")).toBe(false);
+    expect(isZipCode("17 150")).toBe(false);
+    expect(isZipCode("17.150")).toBe(false);
+  });
+
+  it("debería retornar false para códigos postales con código de provincia inválido", () => {
+    expect(isZipCode("000150")).toBe(false);
+    expect(isZipCode("250150")).toBe(false);
+    expect(isZipCode("990150")).toBe(false);
+  });
+
+  it("debería retornar false para una cadena vacía", () => {
+    expect(isZipCode("")).toBe(false);
   });
 });
