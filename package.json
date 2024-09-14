@@ -41,7 +41,8 @@
   ],
   "scripts": {
     "build": "tsup",
-    "test": "vitest"
+    "test": "vitest",
+    "prepublish": "bun run build"
   },
   "devDependencies": {
     "@types/bun": "latest",
