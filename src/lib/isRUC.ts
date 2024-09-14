@@ -24,6 +24,7 @@ export default function isRUC(ruc: string): boolean {
   }
 
   // Obtenemos el tercer dígito para determinar el tipo de entidad
+  // Fuente: https://www.sri.gob.ec/ruc-personas-naturales
   const thirdDigit = parseInt(ruc[2], 10);
 
   // Validación para personas naturales (tercer dígito entre 0 y 5)
