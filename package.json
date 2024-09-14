@@ -1,6 +1,7 @@
 {
   "name": "validator-ec",
-  "version": "1.0.0",
+  "version": "1.0.3",
+  "type": "module",
   "author": "Victor Bayas",
   "license": "Apache-2.0",
   "repository": {
@@ -10,20 +11,25 @@
   "bugs": {
     "url": "https://github.com/bayasdev/validator-ec/issues"
   },
-  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    "./package.json": "./package.json",
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    }
+  },
   "files": [
     "dist"
   ],
-  "module": "dist/index.js",
-  "main": "dist/index.cjs",
-  "types": "dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
-    }
-  },
   "scripts": {
     "build": "tsup",
     "test": "vitest"
