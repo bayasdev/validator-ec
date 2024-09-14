@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { isCedula } from "../src";
+import { isCedula, isRUC } from "../src";
 
 describe("Función isCedula", () => {
   it("debería retornar true para una cédula válida", () => {
@@ -60,5 +60,40 @@ describe("Función isCedula", () => {
 
   it("debería retornar false si la suma total es múltiplo de 10 pero el dígito verificador no coincide", () => {
     expect(isCedula("1710034069")).toBe(false);
+  });
+});
+
+describe("Función isRUC", () => {
+  it("debería retornar true para un RUC válido de persona natural", () => {
+    expect(isRUC("1710034065001")).toBe(true);
+  });
+
+  it("debería retornar true para un RUC válido de persona jurídica", () => {
+    expect(isRUC("1790016919001")).toBe(true);
+    expect(isRUC("0990004196001")).toBe(true);
+  });
+
+  it("debería retornar true para un RUC válido de entidad pública", () => {
+    expect(isRUC("1760001550001")).toBe(true);
+  });
+
+  it("debería retornar false para un RUC inválido", () => {
+    expect(isRUC("1710034065000")).toBe(false);
+    expect(isRUC("0990001099000")).toBe(false);
+    expect(isRUC("1760001550000")).toBe(false);
+  });
+
+  it("debería retornar false si el RUC no tiene 13 dígitos", () => {
+    expect(isRUC("17100340650")).toBe(false);
+    expect(isRUC("17100340650011")).toBe(false);
+  });
+
+  it("debería retornar false para RUCs con caracteres no numéricos", () => {
+    expect(isRUC("17A0034065001")).toBe(false);
+    expect(isRUC("17100X4065001")).toBe(false);
+  });
+
+  it("debería retornar false si el código de establecimiento no es 001", () => {
+    expect(isRUC("1710034065000")).toBe(false);
   });
 });
