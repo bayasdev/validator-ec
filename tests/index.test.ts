@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { isCedula, isRUC } from "../src";
 
-describe("Función isCedula", () => {
+describe("Validador isCedula", () => {
   it("debería retornar true para una cédula válida", () => {
     expect(isCedula("0151314416")).toBe(true); // Provincia 01 (Azuay)
     expect(isCedula("0258192483")).toBe(true); // Provincia 02 (Bolívar)
@@ -63,7 +63,7 @@ describe("Función isCedula", () => {
   });
 });
 
-describe("Función isRUC", () => {
+describe("Validador isRUC", () => {
   it("debería retornar true para un RUC válido de persona natural", () => {
     expect(isRUC("1710034065001")).toBe(true);
   });
@@ -71,6 +71,8 @@ describe("Función isRUC", () => {
   it("debería retornar true para un RUC válido de persona jurídica", () => {
     expect(isRUC("1790016919001")).toBe(true);
     expect(isRUC("0990004196001")).toBe(true);
+    expect(isRUC("0190072002001")).toBe(true);
+    expect(isRUC("1390012949001")).toBe(true);
   });
 
   it("debería retornar true para un RUC válido de entidad pública", () => {
