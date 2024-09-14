@@ -1,3 +1,5 @@
+import isDigits from "../helpers/isDigits";
+
 export default function isCedula(cedula: string): boolean {
   // Validamos que la cédula tenga 10 dígitos
   if (cedula.length !== 10) {
@@ -5,7 +7,7 @@ export default function isCedula(cedula: string): boolean {
   }
 
   // Verificamos que todos los caracteres sean dígitos
-  if (!/^\d+$/.test(cedula)) {
+  if (!isDigits(cedula)) {
     return false;
   }
 

@@ -1,3 +1,4 @@
+import isDigits from "../helpers/isDigits";
 import isCedula from "./isCedula";
 
 export default function isRUC(ruc: string): boolean {
@@ -7,7 +8,7 @@ export default function isRUC(ruc: string): boolean {
   }
 
   // Verificamos que todos los caracteres sean dígitos
-  if (!/^\d+$/.test(ruc)) {
+  if (!isDigits(ruc)) {
     return false;
   }
 
