@@ -1,5 +1,10 @@
 import isDigits from "../helpers/isDigits";
 
+/**
+ *
+ * @param {string} cedula La cédula a validar.
+ * @returns {boolean} Devuelve `true` si la cédula es válida, de lo contrario devuelve `false`.
+ */
 export default function isCedula(cedula: string): boolean {
   // Validamos que la cédula tenga 10 dígitos
   if (cedula.length !== 10) {
