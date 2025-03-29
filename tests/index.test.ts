@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { isCedula, isRUC, isZipCode } from "../src";
+import { isLegalEntityRUC } from "../src/lib/isRUC";
 
 describe("Validador isCedula", () => {
   it("debería retornar true para una cédula válida", () => {
@@ -73,6 +74,18 @@ describe("Validador isRUC", () => {
     expect(isRUC("0990004196001")).toBe(true);
     expect(isRUC("0190072002001")).toBe(true);
     expect(isRUC("1390012949001")).toBe(true);
+  });
+
+  // Prueba para RUCs de personas jurídicas que no pasarían la validación del módulo 11
+  // pero que son válidos según lo dispuesto por el SRI (ya no se valida con módulo 11)
+  it("debería retornar true para RUCs de personas jurídicas sin validación de módulo 11", () => {
+    expect(isRUC("1791234567001")).toBe(true);
+    expect(isRUC("0992345678001")).toBe(true);
+    expect(isRUC("1793456789001")).toBe(true);
+  });
+
+  it("debería retornar true si el RUC pertenece a una persona jurídica", () => {
+    expect(isLegalEntityRUC("1790016919001")).toBe(true);
   });
 
   it("debería retornar true para un RUC válido de entidad pública", () => {

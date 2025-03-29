@@ -5,9 +5,20 @@ import isCedula from "./isCedula";
  * Valida un RUC ecuatoriano.
  *
  * @param {string} ruc El RUC a validar.
- * @returns {boolean} Devuelve `true` si el RUC es válido, de lo contrario devuelve `false`.
+ * @returns {boolean} Devuelve `true` si el RUC es válido,
+ * de lo contrario devuelve `false`.
+ *
+ * @remarks
+ * De acuerdo a lo dispuesto por el Servicio de Rentas Internas (SRI) [1],
+ * esta función **no aplica** el algoritmo de validación del módulo 11 para
+ * RUCs de personas jurídicas (tercer dígito igual a 9).
+ *
+ * En caso de ser necesario, el SRI recomienda verificar la validez del RUC
+ * a través de sus canales oficiales de consulta pública.
+ *
+ * [1] https://minka.gob.ec/mintel/ge/rutr/gobec_forms/uploads/1ef593d96275a7c07987c5bc043ce654/comunicado_cambio_generacion_RUC.pdf
  */
-export default function isRUC(ruc: string): boolean {
+export function isRUC(ruc: string): boolean {
   // Verificamos que el RUC tenga 13 dígitos
   if (ruc.length !== 13) {
     return false;
@@ -55,21 +66,8 @@ export default function isRUC(ruc: string): boolean {
 
 // Función para validar RUC de personas jurídicas
 function validateLegalEntityRUC(ruc: string): boolean {
-  // Coeficientes para personas jurídicas
-  const coefficients = [4, 3, 2, 7, 6, 5, 4, 3, 2];
-  const baseCode = ruc.substring(0, 9);
-  const validatorDigit = parseInt(ruc[9], 10);
-
-  let sum = 0;
-  for (let i = 0; i < coefficients.length; i++) {
-    const value = parseInt(baseCode[i], 10) * coefficients[i];
-    sum += value;
-  }
-
-  const remainder = sum % 11;
-  const result = remainder === 0 ? 0 : 11 - remainder;
-
-  return result === validatorDigit;
+  // Se omite la validación del módulo 11 de acuerdo a lo dispuesto por el SRI
+  return true;
 }
 
 // Función para validar RUC de entidades públicas
@@ -89,4 +87,15 @@ function validatePublicEntityRUC(ruc: string): boolean {
   const result = remainder === 0 ? 0 : 11 - remainder;
 
   return result === validatorDigit;
+}
+
+/**
+ * Determina si un RUC pertenece a una persona jurídica (tercer dígito igual a 9).
+ *
+ * @param {string} ruc El RUC a comprobar.
+ * @returns {boolean} Devuelve `true` si el RUC pertenece a una persona jurídica,
+ * de lo contrario devuelve `false`.
+ */
+export function isLegalEntityRUC(ruc: string): boolean {
+  return ruc.length === 13 && ruc[2] === "9";
 }
