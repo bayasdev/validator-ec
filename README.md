@@ -34,11 +34,12 @@ npm install validator-ec
 
 ## Validadores
 
-| Validador                             | Descripción                                                                                                               | Ejemplo                  |
-| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | ------------------------ |
-| `isCedula(cedula: string): boolean`   | Valida una cédula de identidad ecuatoriana. Devuelve `true` si la cédula es válida, de lo contrario `false`.              | `isCedula('1710034065')` |
-| `isRUC(ruc: string): boolean`         | Valida un número de RUC (Registro Único de Contribuyentes). Devuelve `true` si el RUC es válido, de lo contrario `false`. | `isRUC('1790016919001')` |
-| `isZipCode(zipCode: string): boolean` | Valida un código postal ecuatoriano. Devuelve `true` si el código postal es válido, de lo contrario `false`.              | `isZipCode('131401')`    |
+| Validador                                | Descripción                                                                                                               | Ejemplo                             |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
+| `isCedula(cedula: string): boolean`      | Valida una cédula de identidad ecuatoriana. Devuelve `true` si la cédula es válida, de lo contrario `false`.              | `isCedula('1710034065')`            |
+| `isRUC(ruc: string): boolean`            | Valida un número de RUC (Registro Único de Contribuyentes). Devuelve `true` si el RUC es válido, de lo contrario `false`. | `isRUC('1790016919001')`            |
+| `isLegalEntityRUC(ruc: string): boolean` | Devuelve `true` si un RUC pertenece a una persona jurídica (tercer dígito igual a 9), de lo contrario `false`.            | `isLegalEntityRuc('0992345678001')` |
+| `isZipCode(zipCode: string): boolean`    | Valida un código postal ecuatoriano. Devuelve `true` si el código postal es válido, de lo contrario `false`.              | `isZipCode('131401')`               |
 
 ## Uso
 
