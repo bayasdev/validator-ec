@@ -96,11 +96,14 @@ sameTaxpayer("1790016919001", "1790016919"); // false
 
 #### `isZipCode(codigo: string): boolean`
 
-Seis dígitos que empiezan por una provincia del 01 al 24. Es independiente de las identificaciones.
+Si tiene la forma de un código postal ecuatoriano: seis dígitos que empiezan por una provincia del 01 al 24, o por el 90 de las zonas no delimitadas. Es independiente de las identificaciones.
 
 ```typescript
-isZipCode("170150"); // true, Pichincha
+isZipCode("170102"); // true, Gualea (Quito)
+isZipCode("900003"); // true, Manga del Cura
 ```
+
+Solo comprueba la forma. No hay una lista oficial abierta de los códigos que existen, así que no puede decir si un código existe: para eso, consulta a la Agencia Nacional Postal. Las pruebas comprueban que acepta los 1.225 códigos ecuatorianos que lista [GeoNames](https://www.geonames.org/).
 
 ## Las reglas, y de dónde salen
 
@@ -131,4 +134,4 @@ Para publicar, sube una etiqueta `vX.Y.Z` que coincida con `package.json`: GitHu
 
 ## Licencia
 
-[Apache 2.0](LICENSE)
+[Apache 2.0](LICENSE). La lista de códigos postales con que se prueba `isZipCode` (`tests/data`) es de [GeoNames](https://www.geonames.org/), bajo [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).

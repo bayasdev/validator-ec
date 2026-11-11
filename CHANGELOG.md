@@ -18,6 +18,7 @@ Las reglas siguen ahora lo que publica el SRI, y algunas respuestas cambian.
 - `taxpayerTypeOf` dice a quién pertenece un RUC: `"persona_natural"`, `"sociedad"` (entidad pública) o `"sociedad_o_extranjero"` (tercer dígito 9, que el SRI usa para sociedades privadas y para extranjeros sin cédula).
 - `isNaturalPerson`, `cedulaOfRUC` y `sameTaxpayer`, para unir el RUC de una persona natural con su cédula.
 - `isFinalConsumer` y la constante `FINAL_CONSUMER`.
+- `isZipCode` acepta los códigos de las zonas no delimitadas, que empiezan por 90 (por ejemplo, `900003`, Manga del Cura). La versión 1 los rechazaba.
 
 ### Para migrar
 
