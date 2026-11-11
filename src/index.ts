@@ -1,5 +1,17 @@
-import isCedula from "./lib/isCedula";
-import { isRUC, isLegalEntityRUC } from "./lib/isRUC";
-import isZipCode from "./lib/isZipCode";
+export { isCedula } from "./cedula.ts";
 
-export { isCedula, isRUC, isLegalEntityRUC, isZipCode };
+export { CONSUMIDOR_FINAL, isConsumidorFinal } from "./consumidor-final.ts";
+
+export {
+  cedulaOfRUC,
+  isLegalEntityRUC,
+  isNaturalPerson,
+  isPublicEntityRUC,
+  isRUC,
+  sameTaxpayer,
+  taxpayerTypeOf,
+} from "./ruc.ts";
+
+export type { TaxpayerType } from "./ruc.ts";
+
+export { isZipCode } from "./zip-code.ts";

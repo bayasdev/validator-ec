@@ -28,5 +28,6 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: Check the tag matches the package version
         run: test "v$(node -p 'require("./package.json").version')" = "$GITHUB_REF_NAME"
-      # prepublishOnly runs the tests and the build first.
+      # prepublishOnly runs every check, the tests, the build and the
+      # package checks first.
       - run: npm publish

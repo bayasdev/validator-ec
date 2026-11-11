@@ -1,4 +1,5 @@
-# Tests and the build on every push and pull request.
+# Formatting, lint, types, tests, the build and the published package's
+# shape, on every push and pull request.
 name: CI
 
 on:
@@ -15,7 +16,7 @@ concurrency:
 
 jobs:
   check:
-    name: Tests and build
+    name: Lint, types, tests, build and package
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -26,5 +27,8 @@ jobs:
           node-version-file: .node-version
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - run: pnpm check
+      - run: pnpm check-types
       - run: pnpm test
       - run: pnpm build
+      - run: pnpm check-package

@@ -1,117 +1,65 @@
 # validator-ec
 
-Colección de validadores de datos comunes en Ecuador desarrollada en TypeScript.
-
-Actualmente, cuenta con validadores para cédulas de identidad ecuatorianas, números de RUC (Registro Único de Contribuyentes) y códigos postales.
-
-## Características
-
-- Compatibilidad con TypeScript y JavaScript (ES Modules y CommonJS).
-- Fácil integración en cualquier proyecto frontend o backend.
-- Extensible, permitiendo agregar más validadores en el futuro.
-
-## Instalación
-
-Puedes instalar **validator-ec** utilizando el gestor de paquetes que prefieras.
-
-### pnpm
+Validadores de cédula, RUC y código postal ecuatorianos, en TypeScript y sin dependencias, según las reglas que publica el Servicio de Rentas Internas (SRI).
 
 ```bash
 pnpm add validator-ec
 ```
 
-### Bun
+También con `npm install validator-ec`, `yarn add validator-ec` o `bun add validator-ec`. Necesita Node.js 22 o posterior y se publica solo como módulo ES; desde Node.js 22.12, `require("validator-ec")` también funciona.
 
-```bash
-bun add validator-ec
-```
+## Uso
 
-### Yarn
+```typescript
+import { isCedula, isRUC, sameTaxpayer } from "validator-ec";
 
-```bash
-yarn add validator-ec
-```
-
-### NPM
-
-```bash
-npm install validator-ec
+isCedula("1710034065"); // true
+isRUC("1790016919001"); // true
+sameTaxpayer("1710034065001", "1710034065"); // true, la misma persona
 ```
 
 ## Validadores
 
-| Validador                                | Descripción                                                                                                               | Ejemplo                             |
-| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
-| `isCedula(cedula: string): boolean`      | Valida una cédula de identidad ecuatoriana. Devuelve `true` si la cédula es válida, de lo contrario `false`.              | `isCedula('1710034065')`            |
-| `isRUC(ruc: string): boolean`            | Valida un número de RUC (Registro Único de Contribuyentes). Devuelve `true` si el RUC es válido, de lo contrario `false`. | `isRUC('1790016919001')`            |
-| `isLegalEntityRUC(ruc: string): boolean` | Devuelve `true` si un RUC pertenece a una persona jurídica (tercer dígito igual a 9), de lo contrario `false`.            | `isLegalEntityRuc('0992345678001')` |
-| `isZipCode(zipCode: string): boolean`    | Valida un código postal ecuatoriano. Devuelve `true` si el código postal es válido, de lo contrario `false`.              | `isZipCode('131401')`               |
+| Función | Devuelve |
+| --- | --- |
+| `isCedula(cedula)` | Si es una cédula válida: diez dígitos, provincia del 01 al 24 o 30, tercer dígito del 0 al 5 y el dígito verificador del módulo 10. |
+| `isRUC(ruc)` | Si es un RUC válido: trece dígitos que terminan en `001`. El de una persona natural es su cédula seguida de `001`; el de una entidad pública (tercer dígito 6) o una sociedad (tercer dígito 9) necesita una provincia válida. |
+| `isLegalEntityRUC(ruc)` | Si es el RUC válido de una sociedad privada o de un extranjero sin cédula (tercer dígito 9). |
+| `isPublicEntityRUC(ruc)` | Si es el RUC válido de una entidad pública (tercer dígito 6). |
+| `taxpayerTypeOf(ruc)` | `"persona_natural"` o `"sociedad"` para un RUC válido; `null` para cualquier otra cosa. |
+| `isNaturalPerson(identificacion)` | Si es una cédula válida o el RUC válido de una persona natural. |
+| `cedulaOfRUC(ruc)` | La cédula con que se forma el RUC de una persona natural, o `null`. |
+| `sameTaxpayer(a, b)` | Si dos identificaciones son del mismo contribuyente: iguales, o el RUC de una persona natural y su cédula. |
+| `isConsumidorFinal(identificacion)` | Si es `9999999999999`, la identificación del consumidor final (`CONSUMIDOR_FINAL`). |
+| `isZipCode(codigo)` | Si es un código postal válido: seis dígitos que empiezan por una provincia del 01 al 24. |
 
-## Uso
+## Las reglas, y de dónde salen
 
-### TypeScript
+**Cédula.** El dígito verificador sigue el módulo 10 del SRI: los nueve primeros dígitos se multiplican por 2, 1, 2…, a cada producto mayor que 9 se le resta 9, y el verificador completa la suma hasta la siguiente decena, o es 0 si ya es múltiplo de 10. El tercer dígito va del 0 al 5, porque el SRI reserva el 6 y el 9 para los RUCs de entidades públicas y sociedades.
 
-```typescript
-import { isCedula } from "validator-ec";
+**RUC de entidades públicas y sociedades.** No se comprueba su dígito verificador. Desde 2021 el SRI emite RUCs que no cumplen el módulo 11, declara válido todo RUC que genera y recomienda consultar su catastro para saber si uno existe ([comunicado del SRI](https://minka.gob.ec/mintel/ge/rutr/gobec_forms/-/issues/32)). Un validador sin conexión solo puede comprobar su forma.
 
-// Validar una cédula
-const cedula = "1710034065";
-const isValid = isCedula(cedula);
+**Consumidor final.** `9999999999999` es el tipo 07 de la tabla 6 de la [ficha técnica de comprobantes electrónicos](https://www.sri.gob.ec/facturacion-electronica) del SRI. No es un RUC: `isRUC` lo rechaza.
 
-if (isValid) {
-  console.log("La cédula es válida");
-} else {
-  console.log("La cédula no es válida");
-}
-```
+## Pasar de la versión 1 a la 2
 
-### JavaScript (CommonJS)
-
-```javascript
-const { isCedula } = require("validator-ec");
-
-// Validar una cédula
-const cedula = "1710034065";
-const isValid = isCedula(cedula);
-
-if (isValid) {
-  console.log("La cédula es válida");
-} else {
-  console.log("La cédula no es válida");
-}
-```
+Ver el [registro de cambios](CHANGELOG.md#200).
 
 ## Contribuir
 
-Todas las contribuciones son bienvenidas. Si deseas contribuir al proyecto, asegúrate de tener instalado [pnpm](https://pnpm.io/) antes de seguir los siguientes pasos:
-
-1. Crea un fork del proyecto.
-2. Crea una nueva rama con el nombre de la funcionalidad que deseas agregar.
-3. Instala las dependencias del proyecto con `pnpm install`.
-4. Realiza los cambios necesarios.
-5. Agrega pruebas para la nueva funcionalidad.
-6. Realiza un pull request a la rama `main`.
-
-## Pruebas
-
-Para ejecutar las pruebas del proyecto con [Vitest](https://vitest.dev/), utiliza el siguiente comando:
+Hace falta [pnpm](https://pnpm.io/). `pnpm install`, y antes de cada pull request a `main`:
 
 ```bash
-pnpm test
+pnpm check        # formato, lint y código sin usar
+pnpm check-types  # tipos
+pnpm test         # pruebas
+pnpm build        # compilación
 ```
 
-## Construir el proyecto
+Las pruebas son propiedades con [Hegel](https://hegel.dev/) contra un oráculo escrito en la propia prueba a partir de la regla del SRI. Cada valor fijo cita de dónde sale. [AGENTS.md](AGENTS.md) tiene las reglas completas.
 
-Para construir el proyecto con [tsup](https://tsup.egoist.dev/), utiliza el siguiente comando:
-
-```bash
-pnpm build
-```
-
-## Autores
-
-- [Victor Bayas](https://github.com/bayasdev)
+Las versiones se publican solas: una etiqueta `vX.Y.Z` que coincida con `package.json` dispara la publicación en npm desde GitHub Actions, con declaración de procedencia.
 
 ## Licencia
 
-Este proyecto está liberado bajo la licencia Apache 2.0. Para más información, revisa el archivo [LICENSE](LICENSE).
+Apache 2.0. Ver [LICENSE](LICENSE).
