@@ -1,17 +1,19 @@
-export { isCedula } from "./cedula.ts";
-
-export { CONSUMIDOR_FINAL, isConsumidorFinal } from "./consumidor-final.ts";
-
 export {
   cedulaOfRUC,
-  isLegalEntityRUC,
+  FINAL_CONSUMER,
+  isCedula,
+  isFinalConsumer,
   isNaturalPerson,
-  isPublicEntityRUC,
   isRUC,
+  parseIdentification,
   sameTaxpayer,
   taxpayerTypeOf,
-} from "./ruc.ts";
+} from "./identification.ts";
 
-export type { TaxpayerType } from "./ruc.ts";
+export type {
+  Identification,
+  InvalidReason,
+  TaxpayerType,
+} from "./identification.ts";
 
 export { isZipCode } from "./zip-code.ts";

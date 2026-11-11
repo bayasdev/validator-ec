@@ -9,11 +9,12 @@ Valida cédulas, RUCs y códigos postales ecuatorianos con las reglas que public
 [![npm](https://img.shields.io/npm/v/validator-ec)](https://www.npmjs.com/package/validator-ec) [![Descargas](https://img.shields.io/npm/dm/validator-ec)](https://www.npmjs.com/package/validator-ec) [![CI](https://github.com/bayasdev/validator-ec/actions/workflows/ci.yml/badge.svg)](https://github.com/bayasdev/validator-ec/actions/workflows/ci.yml) [![Licencia](https://img.shields.io/npm/l/validator-ec)](LICENSE)
 
 ```typescript
-import { isCedula, isRUC } from "validator-ec";
+import { isCedula, isRUC, parseIdentification } from "validator-ec";
 
 isCedula("1710034065"); // true
 isRUC("1790016919001"); // true
 isRUC("9999999999999"); // false, es el consumidor final
+parseIdentification("1710034060"); // { ok: false, reason: "digito_verificador" }
 ```
 
 - **Fiel al SRI.** Cada regla cita de dónde sale, y no inventa un dígito verificador que el SRI ya no garantiza.
@@ -34,83 +35,68 @@ Necesita Node.js 22.12 o posterior. Se publica como módulo ES, y `require("vali
 
 ## API
 
-Todas las funciones reciben una cadena y nunca lanzan errores: lo que no es válido devuelve `false` o `null`, y `sameTaxpayer` nunca une dos valores que no son identificaciones válidas.
+Todas las funciones reciben una cadena y nunca lanzan errores.
 
-### Cédula
+### Leer una identificación
 
-#### `isCedula(cedula: string): boolean`
+#### `parseIdentification(valor: string): Identification`
 
-Diez dígitos, una provincia del 01 al 24 o el 30, un tercer dígito del 0 al 5 y el dígito verificador del módulo 10.
+Lee una cédula, un RUC o el consumidor final de una vez, y dice qué es o por qué no es válido. Es lo que usan todas las demás funciones, y lo que necesita un formulario para explicar el error.
+
+```typescript
+parseIdentification("1710034065"); // { ok: true, kind: "cedula", taxpayer: "persona_natural" }
+parseIdentification("1790016919001"); // { ok: true, kind: "ruc", taxpayer: "sociedad_o_extranjero" }
+parseIdentification("9999999999999"); // { ok: true, kind: "consumidor_final" }
+parseIdentification("1710034060"); // { ok: false, reason: "digito_verificador" }
+```
+
+| `reason` | Qué falla |
+| --- | --- |
+| `"longitud"` | No tiene 10 ni 13 caracteres. |
+| `"caracteres"` | Tiene algo que no es un dígito. |
+| `"provincia"` | No empieza por una provincia que pueda emitirlo: del 01 al 24, o el 30 en una cédula. |
+| `"tercer_digito"` | El tercer dígito no corresponde a ningún tipo de contribuyente. |
+| `"digito_verificador"` | El verificador de la cédula no cumple el módulo 10. |
+| `"establecimiento"` | Un RUC que no termina en `001`. |
+
+`taxpayer` dice a quién pertenece, hasta donde el número lo dice: `"persona_natural"` (una cédula o su RUC), `"sociedad"` (una entidad pública, tercer dígito 6) o `"sociedad_o_extranjero"` (tercer dígito 9: una sociedad privada o una persona natural extranjera sin cédula, que solo el catastro del SRI distingue).
+
+### Preguntas de sí o no
 
 ```typescript
 isCedula("1710034065"); // true
-isCedula("1710034060"); // false, el verificador no coincide
-```
-
-### RUC
-
-#### `isRUC(ruc: string): boolean`
-
-Trece dígitos que terminan en `001`. El RUC de una persona natural es su cédula seguida de `001`; el de una entidad pública (tercer dígito 6), o de una sociedad privada o un extranjero sin cédula (tercer dígito 9), empieza por la provincia de su establecimiento principal, del 01 al 24.
-
-```typescript
-isRUC("1710034065001"); // true, persona natural
 isRUC("1760001550001"); // true, entidad pública
-isRUC("1790016919001"); // true, sociedad
-```
-
-#### `taxpayerTypeOf(ruc: string): TaxpayerType | null`
-
-A quién pertenece un RUC válido, hasta donde su número lo dice. Un tercer dígito 9 puede ser una sociedad privada o una persona natural extranjera sin cédula: el SRI les da la misma forma, y solo su catastro dice cuál es.
-
-```typescript
-taxpayerTypeOf("1710034065001"); // "persona_natural"
-taxpayerTypeOf("1760001550001"); // "sociedad", entidad pública
+isFinalConsumer("9999999999999"); // true
+isNaturalPerson("1710034065001"); // true
 taxpayerTypeOf("1790016919001"); // "sociedad_o_extranjero"
-taxpayerTypeOf("1234"); // null
 ```
 
-#### `isLegalEntityRUC(ruc: string): boolean` y `isPublicEntityRUC(ruc: string): boolean`
-
-Si es el RUC válido de una sociedad privada o un extranjero sin cédula (tercer dígito 9), o de una entidad pública (tercer dígito 6).
-
-#### `isNaturalPerson(identificacion: string): boolean`
-
-Si es una cédula válida o el RUC válido de una persona natural, con certeza. El RUC de un extranjero sin cédula no cuenta, porque su número no lo distingue del de una sociedad.
+| Función | Devuelve |
+| --- | --- |
+| `isCedula(valor)` | Si es una cédula válida. |
+| `isRUC(valor)` | Si es un RUC válido. El consumidor final no lo es. |
+| `isFinalConsumer(valor)` | Si es `9999999999999` (`FINAL_CONSUMER`), el consumidor final de los comprobantes electrónicos. |
+| `taxpayerTypeOf(ruc)` | El `taxpayer` de un RUC válido, o `null`. |
+| `isNaturalPerson(valor)` | Si es, con certeza, de una persona natural: una cédula válida o su RUC. |
 
 ### Una persona, dos identificaciones
 
 El SRI deja que una persona natural compre con su cédula aunque esté inscrita con su RUC. Estas funciones las unen.
 
-#### `cedulaOfRUC(ruc: string): string | null`
-
 ```typescript
 cedulaOfRUC("1710034065001"); // "1710034065"
 cedulaOfRUC("1790016919001"); // null, una sociedad no tiene cédula
-```
-
-#### `sameTaxpayer(a: string, b: string): boolean`
-
-```typescript
 sameTaxpayer("1710034065001", "1710034065"); // true
 sameTaxpayer("1790016919001", "1790016919"); // false
 ```
 
-### Consumidor final
-
-#### `isConsumidorFinal(identificacion: string): boolean` y `CONSUMIDOR_FINAL`
-
-`9999999999999`, la identificación del consumidor final en los comprobantes electrónicos. No es un RUC ni una cédula.
-
-```typescript
-isConsumidorFinal("9999999999999"); // true
-```
+`sameTaxpayer` nunca une dos valores que no son cédulas o RUCs válidos.
 
 ### Código postal
 
 #### `isZipCode(codigo: string): boolean`
 
-Seis dígitos que empiezan por una provincia del 01 al 24.
+Seis dígitos que empiezan por una provincia del 01 al 24. Es independiente de las identificaciones.
 
 ```typescript
 isZipCode("170150"); // true, Pichincha

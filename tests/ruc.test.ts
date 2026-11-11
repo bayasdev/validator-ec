@@ -2,12 +2,10 @@ import * as hegel from "@hegeldev/hegel";
 import * as gs from "@hegeldev/hegel/generators";
 import { describe, expect, it } from "vitest";
 import {
-  CONSUMIDOR_FINAL,
   cedulaOfRUC,
-  isConsumidorFinal,
-  isLegalEntityRUC,
+  FINAL_CONSUMER,
+  isFinalConsumer,
   isNaturalPerson,
-  isPublicEntityRUC,
   isRUC,
   sameTaxpayer,
   taxpayerTypeOf,
@@ -137,7 +135,7 @@ describe("isRUC de una sociedad o una entidad pública", () => {
   // https://minka.gob.ec/mintel/ge/rutr/gobec_forms/-/issues/32
   it("acepta el RUC de ejemplo del comunicado del SRI, 1790085783001", () => {
     expect(isRUC("1790085783001")).toBeTruthy();
-    expect(isLegalEntityRUC("1790085783001")).toBeTruthy();
+    expect(taxpayerTypeOf("1790085783001")).toBe("sociedad_o_extranjero");
   });
 });
 
@@ -155,13 +153,12 @@ describe("isRUC en general", () => {
     );
   });
 
-  it("no da tipo ni une consigo mismo nada que se parezca a un RUC válido sin serlo", () => {
+  it("no es una persona natural ni se une consigo mismo nada que se parezca a un RUC válido sin serlo", () => {
     hegel.test(
       (tc) => {
         const value = tc.draw(nearRUC);
 
-        expect(isLegalEntityRUC(value)).toBeFalsy();
-        expect(isPublicEntityRUC(value)).toBeFalsy();
+        expect(isNaturalPerson(value)).toBeFalsy();
         expect(sameTaxpayer(value, value)).toBeFalsy();
       },
       { testCases: 500 }
@@ -169,9 +166,9 @@ describe("isRUC en general", () => {
   });
 
   it("no toma al consumidor final por un RUC", () => {
-    expect(isConsumidorFinal(CONSUMIDOR_FINAL)).toBeTruthy();
-    expect(isRUC(CONSUMIDOR_FINAL)).toBeFalsy();
-    expect(taxpayerTypeOf(CONSUMIDOR_FINAL)).toBeNull();
+    expect(isFinalConsumer(FINAL_CONSUMER)).toBeTruthy();
+    expect(isRUC(FINAL_CONSUMER)).toBeFalsy();
+    expect(taxpayerTypeOf(FINAL_CONSUMER)).toBeNull();
   });
 });
 
@@ -183,8 +180,6 @@ describe("a quién pertenece un RUC", () => {
 
       expect(taxpayerTypeOf(ruc)).toBe("persona_natural");
       expect(cedulaOfRUC(ruc)).toBe(id);
-      expect(isLegalEntityRUC(ruc)).toBeFalsy();
-      expect(isPublicEntityRUC(ruc)).toBeFalsy();
     });
   });
 
@@ -202,8 +197,6 @@ describe("a quién pertenece un RUC", () => {
       const ruc = tc.draw(publicRUC);
 
       expect(taxpayerTypeOf(ruc)).toBe("sociedad");
-      expect(isPublicEntityRUC(ruc)).toBeTruthy();
-      expect(isLegalEntityRUC(ruc)).toBeFalsy();
       expect(isNaturalPerson(ruc)).toBeFalsy();
       expect(cedulaOfRUC(ruc)).toBeNull();
     });
@@ -214,8 +207,6 @@ describe("a quién pertenece un RUC", () => {
       const ruc = tc.draw(companyRUC);
 
       expect(taxpayerTypeOf(ruc)).toBe("sociedad_o_extranjero");
-      expect(isLegalEntityRUC(ruc)).toBeTruthy();
-      expect(isPublicEntityRUC(ruc)).toBeFalsy();
       expect(isNaturalPerson(ruc)).toBeFalsy();
       expect(cedulaOfRUC(ruc)).toBeNull();
     });
