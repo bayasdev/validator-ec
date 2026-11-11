@@ -174,15 +174,15 @@ tester.run("literal-needs-source", rule("literal-needs-source"), {
       "literal"
     ),
     invalid(
-      "it('totals', () => {\n  // table 3\n\n  expect(total).toBe(249);\n});",
+      "it('totals', () => {\n  // tabla 3\n\n  expect(total).toBe(249);\n});",
       "literal"
     ),
     invalid(
-      "it('totals', () => {\n  const x = 1; // table\n  expect(total).toBe(249);\n});",
+      "it('totals', () => {\n  const x = 1; // ficha\n  expect(total).toBe(249);\n});",
       "literal"
     ),
     invalid(
-      "// table\nit('first', () => {\n  expect(a).toBe(1);\n});\nit('second', () => {\n  expect(total).toBe(249);\n});",
+      "// ficha\nit('first', () => {\n  expect(a).toBe(1);\n});\nit('second', () => {\n  expect(total).toBe(249);\n});",
       "literal"
     ),
     invalid(
@@ -229,12 +229,14 @@ tester.run("literal-needs-source", rule("literal-needs-source"), {
     ),
     // A title that cites its source.
     valid(
-      "it('is the rate in NIST table 16', () => { expect(rate).toBe(15); });"
+      "it('is the base rate in the ficha técnica, tabla 16', () => { expect(rate).toBe(15); });"
     ),
     valid(
-      "it('rejects a shift above the IUPAC limit', () => { expect(limit).toBe('100.00'); });"
+      "it('rejects a withholding above the LRTI limit', () => { expect(limit).toBe('100.00'); });"
     ),
-    valid("it('follows arXiv 2605.02003', () => { expect(days).toBe(20); });"),
+    valid(
+      "it('follows NAC-DGERCGC20-00000076', () => { expect(days).toBe(20); });"
+    ),
     valid(
       "it('matches RFC 9110 Retry-After', () => { expect(wait).toBe('10'); });"
     ),
@@ -244,18 +246,18 @@ tester.run("literal-needs-source", rule("literal-needs-source"), {
     valid("it('is a contract', () => { expect(fee).toBe(299); });"),
     // A describe title that cites its source, even for a nested test.
     valid(
-      "describe('annex 3', () => { describe('rows', () => { it('a', () => { expect(code).toBe(5); }); }); });"
+      "describe('anexo 3', () => { describe('rows', () => { it('a', () => { expect(code).toBe(5); }); }); });"
     ),
     valid(
-      "describe('ISO 8601', () => { it.each(rows)('a', (row) => { expect(row).toBe(7); }); });"
+      "describe('the XSD', () => { it.each(rows)('a', (row) => { expect(row).toBe(7); }); });"
     ),
     // A comment on the assertion, above it, above the test, or above the describe.
     valid(
-      "it('a', () => {\n  // Annex 7: the rounding.\n  expect(total).toBe('12.35');\n});"
+      "it('a', () => {\n  // Annex 7: the SRI's rounding.\n  expect(total).toBe('12.35');\n});"
     ),
-    valid("it('a', () => {\n  expect(total).toBe('12.35'); // table 24\n});"),
+    valid("it('a', () => {\n  expect(total).toBe('12.35'); // tabla 24\n});"),
     valid(
-      "it('a', () => {\n  expect(total).toStrictEqual([\n    // spec 4.2\n    12,\n  ]);\n});"
+      "it('a', () => {\n  expect(total).toStrictEqual([\n    // ficha técnica 4.2\n    12,\n  ]);\n});"
     ),
     valid(
       "// Spec: the plan prices in docs/reference/pricing.md.\nit('a', () => {\n  expect(price).toBe(29);\n});"

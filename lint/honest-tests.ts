@@ -44,19 +44,22 @@ const EXPECTED_ARGUMENT = new Map([
  * case-insensitively as a whole word. Each entry is a regular expression
  * fragment; one that ends in `-` or `/` also matches what follows it.
  *
- * - Scientific references: NIST, IUPAC, a DOI, an arXiv paper, a table or
- *   an annex of one.
+ * - Ecuadorian rules: ficha (técnica), anexo, tabla, NAC- (the SRI's
+ *   resolutions), LRTI (Ley de Régimen Tributario Interno), resolución, XSD.
  * - Public standards: RFC, W3C, OWASP, WHATWG, ISO.
  * - Our own fixed contracts: regression (a named bug), contract, spec, and a
  *   path into our living docs (docs/reference/pricing.md).
  */
 export const SOURCE_PATTERNS = [
-  "NIST",
-  "IUPAC",
-  "DOI",
-  "arXiv",
-  "tables?",
+  "ficha",
   "annex(?:es)?",
+  "anexos?",
+  "tablas?",
+  "NAC-",
+  "LRTI",
+  "resoluci[oó]n",
+  "resolution",
+  "xsd",
   "RFC",
   "W3C",
   "OWASP",
