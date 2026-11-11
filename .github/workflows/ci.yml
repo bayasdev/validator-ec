@@ -32,3 +32,30 @@ jobs:
       - run: pnpm test
       - run: pnpm build
       - run: pnpm check-package
+
+  load:
+    # The oldest Node the package supports and the current one load the
+    # built package both ways its users do.
+    name: Load on Node ${{ matrix.node }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      matrix:
+        node: ["22.12", "24"]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ matrix.node }}
+      - run: node --version
+      - name: import
+        run: node --input-type=module -e "import { isCedula } from 'validator-ec'; if (!isCedula('1710034065')) process.exit(1);"
+      - name: require
+        run: node -e "const { isCedula } = require('validator-ec'); if (!isCedula('1710034065')) process.exit(1);"
