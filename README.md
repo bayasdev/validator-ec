@@ -132,6 +132,20 @@ Las pruebas son propiedades con [Hegel](https://hegel.dev/) contra un oráculo e
 
 Para publicar, sube una etiqueta `vX.Y.Z` que coincida con `package.json`: GitHub Actions publica en npm con la publicación de confianza, sin tokens.
 
+## In English
+
+validator-ec validates Ecuadorian cédulas, RUCs (tax IDs) and postal codes with the rules Ecuador's tax authority, the SRI, publishes. It has no dependencies and ships its own types.
+
+```typescript
+import { isCedula, isRUC, parseIdentification } from "validator-ec";
+
+isCedula("1710034065"); // true
+isRUC("1790016919001"); // true
+parseIdentification("1710034060"); // { ok: false, reason: "digito_verificador" }
+```
+
+Function names are English; the values they return use the SRI's Spanish terms (`"persona_natural"`, `"digito_verificador"`), so they match the SRI's own documents. The API reference above applies as written.
+
 ## Licencia
 
 [Apache 2.0](https://github.com/bayasdev/validator-ec/blob/main/LICENSE). La lista de códigos postales con que se prueba `isZipCode` (`tests/data`) es de [GeoNames](https://www.geonames.org/), bajo [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).

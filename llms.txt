@@ -1,0 +1,26 @@
+# validator-ec
+
+> Validates Ecuadorian identification numbers (cédula, RUC, consumidor final) and postal codes with the rules Ecuador's tax authority (SRI) publishes. TypeScript, zero dependencies, ES module for Node.js 22.12 or later. `parseIdentification` says what a value is or why it is invalid; every other function wraps it.
+
+Install with `npm install validator-ec`. Function names are English; returned values use the SRI's Spanish terms.
+
+```ts
+import { isCedula, isRUC, parseIdentification } from "validator-ec";
+
+isCedula("1710034065"); // true
+isRUC("1790016919001"); // true
+parseIdentification("1710034060"); // { ok: false, reason: "digito_verificador" }
+```
+
+Rules worth knowing before using it:
+
+- A cédula is 10 digits: province 01 to 24 or 30, third digit 0 to 5, and a modulo 10 check digit.
+- A RUC is 13 digits ending in 001. A natural person's RUC is their cédula plus 001. Public (third digit 6) and private or foreign (third digit 9) RUCs are checked by shape only, because the SRI no longer guarantees their modulo 11 digit.
+- 9999999999999 is the consumidor final, not a RUC.
+- isZipCode checks the shape of a postal code only; it cannot tell whether a code exists.
+
+## Docs
+
+- [README](https://github.com/bayasdev/validator-ec/blob/main/README.md): the full API, with an example for every function and the sources behind each rule (Spanish, with an English quick start)
+- [CHANGELOG](https://github.com/bayasdev/validator-ec/blob/main/CHANGELOG.md): what changed in each version and how to migrate from 1.x to 2.x
+- [Type declarations](https://unpkg.com/validator-ec/dist/index.d.ts): every export with its documentation comment
