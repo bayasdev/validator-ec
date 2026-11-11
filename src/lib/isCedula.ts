@@ -36,19 +36,9 @@ export default function isCedula(cedula: string): boolean {
 
   sum += evens + odds;
 
-  // Extraemos el primer digito de la suma
-  const firstDigit = parseInt(sum.toString()[0], 10);
-
-  // Obtenemos la decena
-  const dozen = (firstDigit + 1) * 10;
-
-  // Obtenemos el dígito validador
-  let validatorDigit = dozen - sum;
-
-  // Si el dígito verificador es mayor a 10 lo igualamos a 0
-  if (validatorDigit >= 10) {
-    validatorDigit = 0;
-  }
+  // El dígito verificador completa la suma hasta la siguiente decena, y es 0
+  // si la suma ya es múltiplo de 10. Funciona también con sumas de un dígito.
+  const validatorDigit = (10 - (sum % 10)) % 10;
 
   // Codigo de provincia
   // Validamos si la cedula pertenece a alguna provincia

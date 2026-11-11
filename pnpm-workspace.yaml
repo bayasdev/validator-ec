@@ -1,0 +1,4 @@
+allowBuilds:
+  esbuild: true
+  # Hegel runs its native engine through koffi.
+  koffi: true

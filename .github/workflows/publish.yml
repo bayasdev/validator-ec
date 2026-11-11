@@ -1,0 +1,32 @@
+# Publishes to npm when a version tag (v1.3.1) is pushed. npm's trusted
+# publishing authenticates this workflow through OIDC, so no token is stored,
+# and the package gets a provenance statement. The package's trusted
+# publisher on npmjs.com must name this repository and this file.
+name: Publish
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    name: Publish to npm
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .node-version
+          registry-url: https://registry.npmjs.org
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Check the tag matches the package version
+        run: test "v$(node -p 'require("./package.json").version')" = "$GITHUB_REF_NAME"
+      # prepublishOnly runs the tests and the build first.
+      - run: npm publish

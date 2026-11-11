@@ -14,6 +14,12 @@ Actualmente, cuenta con validadores para cédulas de identidad ecuatorianas, nú
 
 Puedes instalar **validator-ec** utilizando el gestor de paquetes que prefieras.
 
+### pnpm
+
+```bash
+pnpm add validator-ec
+```
+
 ### Bun
 
 ```bash
@@ -77,21 +83,21 @@ if (isValid) {
 
 ## Contribuir
 
-Todas las contribuciones son bienvenidas. Si deseas contribuir al proyecto, asegúrate de tener instalado [Bun](https://bun.sh/) antes de seguir los siguientes pasos:
+Todas las contribuciones son bienvenidas. Si deseas contribuir al proyecto, asegúrate de tener instalado [pnpm](https://pnpm.io/) antes de seguir los siguientes pasos:
 
 1. Crea un fork del proyecto.
 2. Crea una nueva rama con el nombre de la funcionalidad que deseas agregar.
-3. Instala las dependencias del proyecto con `bun install`.
+3. Instala las dependencias del proyecto con `pnpm install`.
 4. Realiza los cambios necesarios.
 5. Agrega pruebas para la nueva funcionalidad.
-6. Realiza un pull request a la rama `master`.
+6. Realiza un pull request a la rama `main`.
 
 ## Pruebas
 
 Para ejecutar las pruebas del proyecto con [Vitest](https://vitest.dev/), utiliza el siguiente comando:
 
 ```bash
-bun run test
+pnpm test
 ```
 
 ## Construir el proyecto
@@ -99,7 +105,7 @@ bun run test
 Para construir el proyecto con [tsup](https://tsup.egoist.dev/), utiliza el siguiente comando:
 
 ```bash
-bun run build
+pnpm build
 ```
 
 ## Autores
