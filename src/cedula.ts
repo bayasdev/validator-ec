@@ -1,4 +1,4 @@
-import { isProvince } from "./province.ts";
+import { isCedulaProvince } from "./province.ts";
 
 const TEN_DIGITS = /^\d{10}$/u;
 
@@ -13,7 +13,7 @@ const TEN_DIGITS = /^\d{10}$/u;
  * @example isCedula("1710034065") // true
  */
 export const isCedula = (cedula: string): boolean => {
-  if (!(TEN_DIGITS.test(cedula) && isProvince(cedula))) {
+  if (!(TEN_DIGITS.test(cedula) && isCedulaProvince(cedula))) {
     return false;
   }
 

@@ -60,7 +60,7 @@
     "vitest": "5.1.0"
   },
   "engines": {
-    "node": ">=22"
+    "node": ">=22.12"
   },
   "packageManager": "pnpm@12.15.0"
 }

@@ -1,3 +1,5 @@
+import { isProvince } from "./province.ts";
+
 const SIX_DIGITS = /^\d{6}$/u;
 
 /**
@@ -6,12 +8,5 @@ const SIX_DIGITS = /^\d{6}$/u;
  *
  * @example isZipCode("170150") // true
  */
-export const isZipCode = (zipCode: string): boolean => {
-  if (!SIX_DIGITS.test(zipCode)) {
-    return false;
-  }
-
-  const province = Number(zipCode.slice(0, 2));
-
-  return province >= 1 && province <= 24;
-};
+export const isZipCode = (zipCode: string): boolean =>
+  SIX_DIGITS.test(zipCode) && isProvince(zipCode);

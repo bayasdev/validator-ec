@@ -2,84 +2,116 @@ import * as gs from "@hegeldev/hegel/generators";
 
 const DIGITS = "0123456789";
 
-/** Las provincias que emiten cédulas: del 01 al 24, y el 30 de los ecuatorianos en el exterior. */
-const PROVINCES = [
-  ...Array.from({ length: 24 }, (_, index) =>
-    String(index + 1).padStart(2, "0")
-  ),
-  "30",
-];
+const twoDigits = (n: number) => String(n).padStart(2, "0");
 
-/** Los códigos de dos dígitos que no son provincias. */
-export const NON_PROVINCES = Array.from({ length: 100 }, (_, index) =>
-  String(index).padStart(2, "0")
-).filter((code) => !PROVINCES.includes(code));
+/** Las 24 provincias, del 01 al 24. */
+const PROVINCES = Array.from({ length: 24 }, (_, index) =>
+  twoDigits(index + 1)
+);
+
+/** Lo que puede empezar una cédula: una provincia, o el 30 de los ecuatorianos en el exterior. */
+const CEDULA_PROVINCES = [...PROVINCES, "30"];
+
+const ALL_CODES = Array.from({ length: 100 }, (_, index) => twoDigits(index));
+
+/** Los códigos de dos dígitos que no pueden empezar una cédula. */
+const NON_CEDULA_PROVINCES = ALL_CODES.filter(
+  (code) => !CEDULA_PROVINCES.includes(code)
+);
+
+/** Los códigos que no son una provincia, el 30 incluido. */
+export const NON_PROVINCES = ALL_CODES.filter(
+  (code) => !PROVINCES.includes(code)
+);
+
+const digitSum = (n: number) =>
+  String(n)
+    .split("")
+    .reduce((sum, digit) => sum + Number(digit), 0);
 
 /**
- * Oráculo escrito a partir de la regla del módulo 10 que publica el SRI:
- * coeficientes 2, 1, 2… sobre los nueve primeros dígitos, restando 9 a cada
- * producto mayor que 9; el verificador completa la suma hasta la siguiente
- * decena, o es 0 si ya es múltiplo de 10.
+ * Si diez dígitos cumplen el módulo 10 del SRI, escrito de otra forma que el
+ * código: con los coeficientes 2, 1, 2, 1… sobre los diez dígitos (el
+ * verificador con 1), la suma de las cifras de cada producto es múltiplo
+ * de 10.
  */
-export const checkDigit = (firstNine: string): number => {
-  let sum = 0;
+const passesModulo10 = (ten: string) =>
+  ten
+    .split("")
+    .reduce(
+      (sum, digit, index) =>
+        sum + digitSum(Number(digit) * (index % 2 === 0 ? 2 : 1)),
+      0
+    ) %
+    10 ===
+  0;
 
-  for (let index = 0; index < 9; index += 1) {
-    const product = Number(firstNine[index]) * (index % 2 === 0 ? 2 : 1);
-    sum += product > 9 ? product - 9 : product;
+/** El único dígito que, puesto al final, hace que nueve dígitos cumplan el módulo 10. */
+export const checkDigit = (firstNine: string): number => {
+  const found = DIGITS.split("").find((digit) =>
+    passesModulo10(`${firstNine}${digit}`)
+  );
+
+  if (found === undefined) {
+    throw new Error(`No check digit for ${firstNine}`);
   }
 
-  return (10 - (sum % 10)) % 10;
+  return Number(found);
 };
 
 export const digits = (size: number) =>
   gs.text({ alphabet: DIGITS, maxSize: size, minSize: size });
 
-/** Nueve dígitos con una provincia y un tercer dígito tomados de los dados. */
-const firstNine = (provinces: string[], thirdDigits: string) =>
+/** Nueve dígitos con un prefijo y un tercer dígito tomados de los dados. */
+const firstNine = (prefixes: string[], thirdDigits: string) =>
   gs.composite((tc) => {
-    const province = tc.draw(gs.sampledFrom(provinces));
+    const prefix = tc.draw(gs.sampledFrom(prefixes));
     const third = tc.draw(gs.sampledFrom(thirdDigits.split("")));
 
-    return `${province}${third}${tc.draw(digits(6))}`;
+    return `${prefix}${third}${tc.draw(digits(6))}`;
   });
 
 const withCheckDigit = (nine: string) => `${nine}${checkDigit(nine)}`;
 
 /** Una cédula válida según el oráculo. */
 export const cedula = gs.composite((tc) =>
-  withCheckDigit(tc.draw(firstNine(PROVINCES, "012345")))
+  withCheckDigit(tc.draw(firstNine(CEDULA_PROVINCES, "012345")))
 );
 
-/** Diez dígitos con el verificador del módulo 10 pero un tercer dígito del 6 al 9. */
-export const checksumValidNonNatural = gs.composite((tc) =>
-  withCheckDigit(tc.draw(firstNine(PROVINCES, "6789")))
-);
+/** Diez dígitos que cumplen el módulo 10 con los terceros dígitos dados. */
+export const checksumValidWithThird = (thirdDigits: string) =>
+  gs.composite((tc) =>
+    withCheckDigit(tc.draw(firstNine(CEDULA_PROVINCES, thirdDigits)))
+  );
 
-/** Diez dígitos con el verificador del módulo 10 pero una provincia que no existe. */
+/** Diez dígitos que cumplen el módulo 10 pero no empiezan por una provincia de cédula. */
 export const checksumValidNonProvince = gs.composite((tc) =>
-  withCheckDigit(tc.draw(firstNine(NON_PROVINCES, "012345")))
+  withCheckDigit(tc.draw(firstNine(NON_CEDULA_PROVINCES, "012345")))
 );
 
 /** Los diez primeros dígitos del RUC de una sociedad o entidad pública, sin verificador que cumplir. */
 export const nonNaturalBase = (
   thirdDigit: "6" | "9",
-  provinces: string[] = PROVINCES
+  prefixes: string[] = PROVINCES
 ) =>
   gs.composite((tc) => {
-    const province = tc.draw(gs.sampledFrom(provinces));
+    const prefix = tc.draw(gs.sampledFrom(prefixes));
 
-    return `${province}${thirdDigit}${tc.draw(digits(7))}`;
+    return `${prefix}${thirdDigit}${tc.draw(digits(7))}`;
   });
 
-/** Cualquier cadena de dígitos de una longitud distinta de la dada. */
-export const digitsOtherThan = (size: number) =>
+/** Una cadena válida con un dígito de más o de menos, en cualquier posición. */
+export const offByOneDigit = (valid: string) =>
   gs.composite((tc) => {
-    const length = tc.draw(
-      gs.integers({ maxValue: 20, minValue: 0 }).filter((n) => n !== size)
-    );
+    const at = tc.draw(gs.integers({ maxValue: valid.length, minValue: 0 }));
 
-    return tc.draw(digits(length));
+    if (tc.draw(gs.booleans())) {
+      return `${valid.slice(0, at)}${tc.draw(digits(1))}${valid.slice(at)}`;
+    }
+
+    const removed = Math.min(at, valid.length - 1);
+
+    return `${valid.slice(0, removed)}${valid.slice(removed + 1)}`;
   });
 
 /** Una cadena válida con un carácter cambiado por algo que no es un dígito ASCII. */

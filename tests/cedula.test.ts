@@ -5,9 +5,9 @@ import { isCedula } from "../src/index.ts";
 import {
   cedula,
   checkDigit,
-  checksumValidNonNatural,
   checksumValidNonProvince,
-  digitsOtherThan,
+  checksumValidWithThird,
+  offByOneDigit,
   withNonDigit,
 } from "./oracle.ts";
 
@@ -26,6 +26,7 @@ describe(isCedula, () => {
       (tc) => {
         const nine = tc.draw(cedula).slice(0, 9);
         const offset = tc.draw(gs.integers({ maxValue: 9, minValue: 1 }));
+
         expect(
           isCedula(`${nine}${(checkDigit(nine) + offset) % 10}`)
         ).toBeFalsy();
@@ -36,7 +37,7 @@ describe(isCedula, () => {
 
   it("rechaza un tercer dígito del 6 al 9 aunque cumpla el módulo 10", () => {
     hegel.test((tc) => {
-      expect(isCedula(tc.draw(checksumValidNonNatural))).toBeFalsy();
+      expect(isCedula(tc.draw(checksumValidWithThird("6789")))).toBeFalsy();
     });
   });
 
@@ -46,9 +47,9 @@ describe(isCedula, () => {
     });
   });
 
-  it("rechaza todo lo que no sean exactamente diez dígitos", () => {
+  it("rechaza una cédula válida con un dígito de más o de menos", () => {
     hegel.test((tc) => {
-      expect(isCedula(tc.draw(digitsOtherThan(10)))).toBeFalsy();
+      expect(isCedula(tc.draw(offByOneDigit(tc.draw(cedula))))).toBeFalsy();
     });
   });
 

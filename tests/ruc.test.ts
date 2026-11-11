@@ -15,34 +15,68 @@ import {
 import {
   cedula,
   checkDigit,
-  checksumValidNonNatural,
+  checksumValidWithThird,
   digits,
-  digitsOtherThan,
   NON_PROVINCES,
   nonNaturalBase,
+  offByOneDigit,
   withNonDigit,
 } from "./oracle.ts";
 
-const nonNaturalRUC = gs.composite(
-  (tc) =>
-    `${tc.draw(nonNaturalBase(tc.draw(gs.sampledFrom(["6", "9"] as const))))}001`
-);
+const companyRUC = gs.composite((tc) => `${tc.draw(nonNaturalBase("9"))}001`);
+const publicRUC = gs.composite((tc) => `${tc.draw(nonNaturalBase("6"))}001`);
+const naturalRUC = gs.composite((tc) => `${tc.draw(cedula)}001`);
 
 /** Un RUC válido de cualquier tipo. */
 const anyRUC = gs.composite((tc) => {
-  const kind = tc.draw(gs.sampledFrom(["natural", "sociedad"] as const));
+  const kind = tc.draw(
+    gs.sampledFrom(["natural", "public", "company"] as const)
+  );
 
-  return kind === "natural" ? `${tc.draw(cedula)}001` : tc.draw(nonNaturalRUC);
+  if (kind === "natural") {
+    return tc.draw(naturalRUC);
+  }
+
+  return tc.draw(kind === "public" ? publicRUC : companyRUC);
 });
 
 /** Cualquier terminación de tres dígitos que no sea 001. */
 const otherSuffix = digits(3).filter((suffix) => suffix !== "001");
 
+/**
+ * Algo que se parece a un RUC válido sin serlo: un RUC válido con otra
+ * terminación, un dígito de más o de menos, un carácter que no es un dígito,
+ * o un tercer dígito 6 o 9 tras algo que no es una provincia.
+ */
+const nearRUC = gs.composite((tc) => {
+  const valid = tc.draw(anyRUC);
+
+  const kind = tc.draw(
+    gs.sampledFrom(["suffix", "length", "character", "province"] as const)
+  );
+
+  if (kind === "suffix") {
+    return `${valid.slice(0, 10)}${tc.draw(otherSuffix)}`;
+  }
+
+  if (kind === "length") {
+    return tc.draw(offByOneDigit(valid));
+  }
+
+  if (kind === "character") {
+    return tc.draw(withNonDigit(valid));
+  }
+
+  const third = tc.draw(gs.sampledFrom(["6", "9"] as const));
+
+  return `${tc.draw(nonNaturalBase(third, NON_PROVINCES))}001`;
+});
+
 describe("isRUC de una persona natural", () => {
   it("acepta toda cédula válida seguida de 001", () => {
     hegel.test(
       (tc) => {
-        expect(isRUC(`${tc.draw(cedula)}001`)).toBeTruthy();
+        expect(isRUC(tc.draw(naturalRUC))).toBeTruthy();
       },
       { testCases: 500 }
     );
@@ -52,25 +86,29 @@ describe("isRUC de una persona natural", () => {
     hegel.test((tc) => {
       const nine = tc.draw(cedula).slice(0, 9);
       const offset = tc.draw(gs.integers({ maxValue: 9, minValue: 1 }));
-      const wrong = `${nine}${(checkDigit(nine) + offset) % 10}`;
-      expect(isRUC(`${wrong}001`)).toBeFalsy();
+
+      expect(
+        isRUC(`${nine}${(checkDigit(nine) + offset) % 10}001`)
+      ).toBeFalsy();
     });
   });
 });
 
 describe("isRUC de una sociedad o una entidad pública", () => {
-  it("acepta un tercer dígito 6 o 9 con una provincia válida, sin exigir un verificador", () => {
+  it("acepta un tercer dígito 6 o 9 tras una provincia, sin exigir un verificador", () => {
     hegel.test(
       (tc) => {
-        expect(isRUC(tc.draw(nonNaturalRUC))).toBeTruthy();
+        expect(isRUC(tc.draw(publicRUC))).toBeTruthy();
+        expect(isRUC(tc.draw(companyRUC))).toBeTruthy();
       },
       { testCases: 500 }
     );
   });
 
-  it("rechaza un tercer dígito 6 o 9 con una provincia que no existe", () => {
+  it("rechaza un tercer dígito 6 o 9 tras algo que no es una provincia, el 30 incluido", () => {
     hegel.test((tc) => {
       const third = tc.draw(gs.sampledFrom(["6", "9"] as const));
+
       expect(
         isRUC(`${tc.draw(nonNaturalBase(third, NON_PROVINCES))}001`)
       ).toBeFalsy();
@@ -79,9 +117,7 @@ describe("isRUC de una sociedad o una entidad pública", () => {
 
   it("rechaza un tercer dígito 7 u 8, que el SRI no asigna", () => {
     hegel.test((tc) => {
-      const valid = tc.draw(checksumValidNonNatural);
-      tc.assume(valid[2] === "7" || valid[2] === "8");
-      expect(isRUC(`${valid}001`)).toBeFalsy();
+      expect(isRUC(`${tc.draw(checksumValidWithThird("78"))}001`)).toBeFalsy();
     });
   });
 
@@ -95,26 +131,41 @@ describe("isRUC de una sociedad o una entidad pública", () => {
     expect(isRUC("0993366721001")).toBeTruthy();
     expect(isRUC("1793207110001")).toBeTruthy();
   });
+
+  // El ejemplo del propio comunicado del SRI, con su verificador del
+  // módulo 11 (suma 140, residuo 8, verificador 3).
+  // https://minka.gob.ec/mintel/ge/rutr/gobec_forms/-/issues/32
+  it("acepta el RUC de ejemplo del comunicado del SRI, 1790085783001", () => {
+    expect(isRUC("1790085783001")).toBeTruthy();
+    expect(isLegalEntityRUC("1790085783001")).toBeTruthy();
+  });
 });
 
 describe("isRUC en general", () => {
-  it("rechaza toda terminación distinta de 001", () => {
-    hegel.test((tc) => {
-      const base = tc.draw(anyRUC).slice(0, 10);
-      expect(isRUC(`${base}${tc.draw(otherSuffix)}`)).toBeFalsy();
-    });
+  it("rechaza todo lo que se parece a un RUC válido sin serlo", () => {
+    hegel.test(
+      (tc) => {
+        const value = tc.draw(nearRUC);
+
+        expect(isRUC(value)).toBeFalsy();
+        expect(taxpayerTypeOf(value)).toBeNull();
+        expect(cedulaOfRUC(value)).toBeNull();
+      },
+      { testCases: 500 }
+    );
   });
 
-  it("rechaza todo lo que no sean exactamente trece dígitos", () => {
-    hegel.test((tc) => {
-      expect(isRUC(tc.draw(digitsOtherThan(13)))).toBeFalsy();
-    });
-  });
+  it("no da tipo ni une consigo mismo nada que se parezca a un RUC válido sin serlo", () => {
+    hegel.test(
+      (tc) => {
+        const value = tc.draw(nearRUC);
 
-  it("rechaza un RUC válido con un carácter que no es un dígito", () => {
-    hegel.test((tc) => {
-      expect(isRUC(tc.draw(withNonDigit(tc.draw(anyRUC))))).toBeFalsy();
-    });
+        expect(isLegalEntityRUC(value)).toBeFalsy();
+        expect(isPublicEntityRUC(value)).toBeFalsy();
+        expect(sameTaxpayer(value, value)).toBeFalsy();
+      },
+      { testCases: 500 }
+    );
   });
 
   it("no toma al consumidor final por un RUC", () => {
@@ -129,31 +180,52 @@ describe("a quién pertenece un RUC", () => {
     hegel.test((tc) => {
       const id = tc.draw(cedula);
       const ruc = `${id}001`;
+
       expect(taxpayerTypeOf(ruc)).toBe("persona_natural");
       expect(cedulaOfRUC(ruc)).toBe(id);
-      expect(isNaturalPerson(ruc)).toBeTruthy();
+      expect(isLegalEntityRUC(ruc)).toBeFalsy();
+      expect(isPublicEntityRUC(ruc)).toBeFalsy();
+    });
+  });
+
+  it("una cédula válida y su RUC son de una persona natural", () => {
+    hegel.test((tc) => {
+      const id = tc.draw(cedula);
+
       expect(isNaturalPerson(id)).toBeTruthy();
-      expect(isLegalEntityRUC(ruc) || isPublicEntityRUC(ruc)).toBeFalsy();
+      expect(isNaturalPerson(`${id}001`)).toBeTruthy();
     });
   });
 
-  it("una sociedad o entidad pública no es una persona natural ni tiene cédula", () => {
+  it("una entidad pública es una sociedad, sin cédula", () => {
     hegel.test((tc) => {
-      const ruc = tc.draw(nonNaturalRUC);
+      const ruc = tc.draw(publicRUC);
+
       expect(taxpayerTypeOf(ruc)).toBe("sociedad");
-      expect(cedulaOfRUC(ruc)).toBeNull();
+      expect(isPublicEntityRUC(ruc)).toBeTruthy();
+      expect(isLegalEntityRUC(ruc)).toBeFalsy();
       expect(isNaturalPerson(ruc)).toBeFalsy();
-      expect(isLegalEntityRUC(ruc)).toBe(ruc[2] === "9");
-      expect(isPublicEntityRUC(ruc)).toBe(ruc[2] === "6");
+      expect(cedulaOfRUC(ruc)).toBeNull();
     });
   });
 
-  it("nada que no sea un RUC válido tiene tipo ni cédula", () => {
+  it("un tercer dígito 9 es una sociedad o un extranjero sin cédula, nunca con certeza una persona natural", () => {
     hegel.test((tc) => {
-      const value = tc.draw(digitsOtherThan(13));
-      expect(taxpayerTypeOf(value)).toBeNull();
-      expect(cedulaOfRUC(value)).toBeNull();
-      expect(isLegalEntityRUC(value) || isPublicEntityRUC(value)).toBeFalsy();
+      const ruc = tc.draw(companyRUC);
+
+      expect(taxpayerTypeOf(ruc)).toBe("sociedad_o_extranjero");
+      expect(isLegalEntityRUC(ruc)).toBeTruthy();
+      expect(isPublicEntityRUC(ruc)).toBeFalsy();
+      expect(isNaturalPerson(ruc)).toBeFalsy();
+      expect(cedulaOfRUC(ruc)).toBeNull();
+    });
+  });
+
+  it("una cédula seguida de otra terminación no es una persona natural", () => {
+    hegel.test((tc) => {
+      expect(
+        isNaturalPerson(`${tc.draw(cedula)}${tc.draw(otherSuffix)}`)
+      ).toBeFalsy();
     });
   });
 });
@@ -162,24 +234,36 @@ describe(sameTaxpayer, () => {
   it("une el RUC de una persona natural con su cédula, en ambos sentidos", () => {
     hegel.test((tc) => {
       const id = tc.draw(cedula);
+
       expect(sameTaxpayer(`${id}001`, id)).toBeTruthy();
       expect(sameTaxpayer(id, `${id}001`)).toBeTruthy();
     });
   });
 
-  it("no une a dos personas distintas", () => {
+  it("une toda identificación válida consigo misma", () => {
+    hegel.test((tc) => {
+      const ruc = tc.draw(anyRUC);
+      const id = tc.draw(cedula);
+
+      expect(sameTaxpayer(ruc, ruc)).toBeTruthy();
+      expect(sameTaxpayer(id, id)).toBeTruthy();
+    });
+  });
+
+  it("no une el RUC de una persona con la cédula de otra", () => {
     hegel.test((tc) => {
       const a = tc.draw(cedula);
-      const b = tc.draw(cedula);
-      tc.assume(a !== b);
+      const b = tc.draw(cedula.filter((other) => other !== a));
+
       expect(sameTaxpayer(`${a}001`, b)).toBeFalsy();
-      expect(sameTaxpayer(a, b)).toBeFalsy();
+      expect(sameTaxpayer(b, `${a}001`)).toBeFalsy();
     });
   });
 
   it("no une el RUC de una sociedad con sus diez primeros dígitos", () => {
     hegel.test((tc) => {
-      const ruc = tc.draw(nonNaturalRUC);
+      const ruc = tc.draw(tc.draw(gs.booleans()) ? publicRUC : companyRUC);
+
       expect(sameTaxpayer(ruc, ruc.slice(0, 10))).toBeFalsy();
     });
   });

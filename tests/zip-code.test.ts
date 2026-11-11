@@ -2,7 +2,7 @@ import * as hegel from "@hegeldev/hegel";
 import * as gs from "@hegeldev/hegel/generators";
 import { describe, expect, it } from "vitest";
 import { isZipCode } from "../src/index.ts";
-import { digits, digitsOtherThan, withNonDigit } from "./oracle.ts";
+import { digits, offByOneDigit, withNonDigit } from "./oracle.ts";
 
 /** Las provincias que tienen códigos postales: del 01 al 24. */
 const ZIP_PROVINCES = Array.from({ length: 24 }, (_, index) =>
@@ -30,7 +30,7 @@ describe(isZipCode, () => {
 
   it("rechaza todo lo que no sean exactamente seis dígitos", () => {
     hegel.test((tc) => {
-      expect(isZipCode(tc.draw(digitsOtherThan(6)))).toBeFalsy();
+      expect(isZipCode(tc.draw(offByOneDigit(tc.draw(zipCode))))).toBeFalsy();
     });
     hegel.test((tc) => {
       expect(isZipCode(tc.draw(withNonDigit(tc.draw(zipCode))))).toBeFalsy();

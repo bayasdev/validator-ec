@@ -1,3 +1,7 @@
+<p align="center">
+  <img src=".github/banner.png" alt="validator-ec: cédula, RUC y código postal ecuatorianos" width="720">
+</p>
+
 # validator-ec
 
 Valida cédulas, RUCs y códigos postales ecuatorianos con las reglas que publica el SRI.
@@ -26,11 +30,11 @@ pnpm add validator-ec
 
 O con `npm install validator-ec`, `yarn add validator-ec` o `bun add validator-ec`.
 
-Necesita Node.js 22 o posterior. Se publica como módulo ES; desde Node.js 22.12, `require("validator-ec")` también funciona. En el navegador funciona con cualquier empaquetador.
+Necesita Node.js 22.12 o posterior. Se publica como módulo ES, y `require("validator-ec")` también lo carga. En el navegador funciona con cualquier empaquetador.
 
 ## API
 
-Todas las funciones reciben una cadena y nunca lanzan errores: lo que no es válido devuelve `false` o `null`.
+Todas las funciones reciben una cadena y nunca lanzan errores: lo que no es válido devuelve `false` o `null`, y `sameTaxpayer` nunca une dos valores que no son identificaciones válidas.
 
 ### Cédula
 
@@ -47,7 +51,7 @@ isCedula("1710034060"); // false, el verificador no coincide
 
 #### `isRUC(ruc: string): boolean`
 
-Trece dígitos que terminan en `001`. El RUC de una persona natural es su cédula seguida de `001`; el de una entidad pública (tercer dígito 6) o una sociedad (tercer dígito 9) necesita una provincia válida.
+Trece dígitos que terminan en `001`. El RUC de una persona natural es su cédula seguida de `001`; el de una entidad pública (tercer dígito 6), o de una sociedad privada o un extranjero sin cédula (tercer dígito 9), empieza por la provincia de su establecimiento principal, del 01 al 24.
 
 ```typescript
 isRUC("1710034065001"); // true, persona natural
@@ -55,13 +59,14 @@ isRUC("1760001550001"); // true, entidad pública
 isRUC("1790016919001"); // true, sociedad
 ```
 
-#### `taxpayerTypeOf(ruc: string): "persona_natural" | "sociedad" | null`
+#### `taxpayerTypeOf(ruc: string): TaxpayerType | null`
 
-A quién pertenece un RUC válido, como lo distinguen las declaraciones del SRI.
+A quién pertenece un RUC válido, hasta donde su número lo dice. Un tercer dígito 9 puede ser una sociedad privada o una persona natural extranjera sin cédula: el SRI les da la misma forma, y solo su catastro dice cuál es.
 
 ```typescript
 taxpayerTypeOf("1710034065001"); // "persona_natural"
-taxpayerTypeOf("1790016919001"); // "sociedad"
+taxpayerTypeOf("1760001550001"); // "sociedad", entidad pública
+taxpayerTypeOf("1790016919001"); // "sociedad_o_extranjero"
 taxpayerTypeOf("1234"); // null
 ```
 
@@ -71,7 +76,7 @@ Si es el RUC válido de una sociedad privada o un extranjero sin cédula (tercer
 
 #### `isNaturalPerson(identificacion: string): boolean`
 
-Si es una cédula válida o el RUC válido de una persona natural.
+Si es una cédula válida o el RUC válido de una persona natural, con certeza. El RUC de un extranjero sin cédula no cuenta, porque su número no lo distingue del de una sociedad.
 
 ### Una persona, dos identificaciones
 
