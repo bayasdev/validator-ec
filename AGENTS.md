@@ -20,6 +20,10 @@ Prefer property-based tests, with [Hegel](https://hegel.dev/). The oracle in `te
 
 A comment sits on the code it explains: never a file header, never above or among the imports (`file-comments/no-head-comments`).
 
+## Changes
+
+Every change reaches `main` through a pull request, merged with a squash once CI passes; `main` is protected and nobody pushes to it directly. A commit message is a short plain subject that says what changed, with no body.
+
 ## Releases
 
 Bump `version` in `package.json` and add its entry to `CHANGELOG.md`, then push a `vX.Y.Z` tag that matches. `.github/workflows/publish.yml` publishes it with npm's trusted publishing and a provenance statement; no token is stored anywhere. A breaking change to what any function accepts is a major version.

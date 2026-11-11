@@ -1,12 +1,12 @@
 <p align="center">
-  <img src=".github/banner.png" alt="validator-ec: cédula, RUC y código postal ecuatorianos" width="720">
+  <img src="https://raw.githubusercontent.com/bayasdev/validator-ec/main/.github/banner.png" alt="validator-ec: cédula, RUC y código postal ecuatorianos" width="720">
 </p>
 
 # validator-ec
 
 Valida cédulas, RUCs y códigos postales ecuatorianos con las reglas que publica el SRI.
 
-[![npm](https://img.shields.io/npm/v/validator-ec)](https://www.npmjs.com/package/validator-ec) [![Descargas](https://img.shields.io/npm/dm/validator-ec)](https://www.npmjs.com/package/validator-ec) [![CI](https://github.com/bayasdev/validator-ec/actions/workflows/ci.yml/badge.svg)](https://github.com/bayasdev/validator-ec/actions/workflows/ci.yml) [![Licencia](https://img.shields.io/npm/l/validator-ec)](LICENSE)
+[![npm](https://img.shields.io/npm/v/validator-ec)](https://www.npmjs.com/package/validator-ec) [![Descargas](https://img.shields.io/npm/dm/validator-ec)](https://www.npmjs.com/package/validator-ec) [![CI](https://github.com/bayasdev/validator-ec/actions/workflows/ci.yml/badge.svg)](https://github.com/bayasdev/validator-ec/actions/workflows/ci.yml) [![Licencia](https://img.shields.io/npm/l/validator-ec)](https://github.com/bayasdev/validator-ec/blob/main/LICENSE)
 
 ```typescript
 import { isCedula, isRUC, parseIdentification } from "validator-ec";
@@ -115,7 +115,7 @@ Solo comprueba la forma. No hay una lista oficial abierta de los códigos que ex
 
 ## Desde la versión 1
 
-La versión 2 cambia algunas respuestas para seguir al SRI. El [registro de cambios](CHANGELOG.md#200) explica cada una y cómo migrar.
+La versión 2 cambia algunas respuestas para seguir al SRI. El [registro de cambios](https://github.com/bayasdev/validator-ec/blob/main/CHANGELOG.md#200) explica cada una y cómo migrar.
 
 ## Contribuir
 
@@ -128,10 +128,10 @@ pnpm test         # pruebas
 pnpm build        # compilación
 ```
 
-Las pruebas son propiedades con [Hegel](https://hegel.dev/) contra un oráculo escrito en la propia prueba a partir de la regla del SRI, y cada valor fijo cita de dónde sale. [AGENTS.md](AGENTS.md) tiene las reglas completas.
+Las pruebas son propiedades con [Hegel](https://hegel.dev/) contra un oráculo escrito en la propia prueba a partir de la regla del SRI, y cada valor fijo cita de dónde sale. [AGENTS.md](https://github.com/bayasdev/validator-ec/blob/main/AGENTS.md) tiene las reglas completas.
 
 Para publicar, sube una etiqueta `vX.Y.Z` que coincida con `package.json`: GitHub Actions publica en npm con la publicación de confianza, sin tokens.
 
 ## Licencia
 
-[Apache 2.0](LICENSE). La lista de códigos postales con que se prueba `isZipCode` (`tests/data`) es de [GeoNames](https://www.geonames.org/), bajo [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
+[Apache 2.0](https://github.com/bayasdev/validator-ec/blob/main/LICENSE). La lista de códigos postales con que se prueba `isZipCode` (`tests/data`) es de [GeoNames](https://www.geonames.org/), bajo [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
