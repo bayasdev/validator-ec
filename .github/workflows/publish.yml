@@ -55,6 +55,10 @@ jobs:
     name: Publish to npm
     needs: build
     runs-on: ubuntu-latest
+    # Waits for the maintainer's approval on GitHub: a pushed tag alone
+    # publishes nothing.
+    environment: release
+    # The wait for the approval is not counted in a job's own time limit.
     timeout-minutes: 10
     permissions:
       # For npm's trusted publishing, and nothing else.

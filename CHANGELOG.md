@@ -1,5 +1,11 @@
 # Registro de cambios
 
+## 2.0.1
+
+Sin cambios en el código de la librería.
+
+- La publicación sale de tres trabajos con un solo permiso cada uno y espera la aprobación del autor.
+
 ## 2.0.0
 
 Las reglas siguen ahora lo que publica el SRI, y algunas respuestas cambian.
