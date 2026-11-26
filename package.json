@@ -56,18 +56,18 @@
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "0.18.5",
-    "@hegeldev/hegel": "0.5.3",
-    "@oxlint/plugins": "1.93.0",
+    "@hegeldev/hegel": "0.6.1",
+    "@oxlint/plugins": "1.94.0",
     "@types/node": "24.19.2",
-    "knip": "6.44.2",
-    "oxfmt": "0.78.0",
-    "oxlint": "1.93.0",
-    "oxlint-tsgolint": "7.0.2006",
+    "knip": "6.48.0",
+    "oxfmt": "0.79.0",
+    "oxlint": "1.94.0",
+    "oxlint-tsgolint": "7.0.2008",
     "publint": "0.3.25",
     "tsdown": "0.23.7",
     "typescript": "7.0.2",
-    "ultracite": "8.1.1",
-    "vitest": "5.1.0"
+    "ultracite": "8.3.1",
+    "vitest": "5.1.1"
   },
   "engines": {
     "node": ">=22.12"
